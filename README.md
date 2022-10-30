@@ -1,4 +1,4 @@
-# [Current Map](https://openplanet.dev/)
+# [Current Map](https://openplanet.dev/plugin/currentmap)
 
   
 
