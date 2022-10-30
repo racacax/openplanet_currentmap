@@ -33,7 +33,7 @@ namespace Flags {
             if(flagsId.Exists(countryIso)) {
                 int flagId = int(flagsId[countryIso]);
                 if(flags[flagId] == null) {
-                    @flags[flagId] = UI::LoadTexture("assets/flags/" + lowercase(countryIso) + ".png");
+                    @flags[flagId] = UI::LoadTexture("assets/flags/" + countryIso.ToLower() + ".png");
                 }
                 return flags[flagId];
             }
