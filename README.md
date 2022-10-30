@@ -21,6 +21,10 @@ All information are sent and stored temporarly to a server in order to share the
 
 The first four information are already public and can be found by any person using the Nadeo Services API.
 
+Compatibility : Trackmania 2020
+
+Compatibility with ManiaPlanet and Trackmania Turbo may be added in the future.
+
 Thanks a lot to Miss, Greep and Phlarx for their work. The code is mostly inspired by plugins of theirs :
 https://github.com/codecat/tm-better-chat
 
