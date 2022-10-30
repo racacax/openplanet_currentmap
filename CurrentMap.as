@@ -25,10 +25,12 @@ int fontSize = 16;
 [Setting name="Refresh rate (ms)" min=5000 max=60000 description="Duration in milliseconds between each refresh."]
 int refreshRate = 10000;
 
+[Setting name="API Endpoint" description="Endpoint called to submit and receive players information"]
+string playersURL = "https://racacax.gq/trackmania/currentmap/players.php";
+
 string PLUGIN_NAME = "CurrentMap";
 bool IS_DEV_MODE = true;
 Json::Value players = Json::Value();
-string PLAYERS_URL = "https://aysun.xl.cx/v1/trackmania/players.php";
 auto countries = Json::Value();
 bool isRunning = false;
 
@@ -50,27 +52,6 @@ void LoadFont() {
 	}
 }
 
-/**
-	Method to get the current player profile. Can be null if not playing a map.
-*/
-CGamePlayer@ GetPlayer() {
-	try {
-		string login = GetLocalLogin();
-
-		auto pg = GetApp().CurrentPlayground;
-
-		for (uint i = 0; i < pg.Players.Length; i++) {
-			auto player = cast<CGamePlayer>(pg.Players[i]);
-				
-			if (player.User.Login == login) {
-				return player;
-			}
-		}
-		return null;
-	} catch {
-		return null;
-	}
-}
 
 /*
 	Main loop to submit and fetch data about players (name, club tag, current map, ...)
@@ -97,7 +78,7 @@ void FetchData() {
 								// ScopeType can be: "Season", "PersonalBest"
 								// GameMode can be: "TimeAttack", "Follow", "ClashTime"
 						auto personalBest = scoreMgr.Map_GetRecord_v2(userId, map.MapInfo.MapUid, "PersonalBest", "", "TimeAttack", "");
-						players = API::PostAsync(PLAYERS_URL, '{"apiKey":"'+apiKey+'","personalBest":'+personalBest+',"authorTime":'+map.TMObjective_AuthorTime+',"tag":"'+player.User.ClubTag+'","login":"'+player.User.Login+'","player":"'+player.User.Name+'","flag":"'+player.User.ZonePath+'","map":"'+GetApp().RootMap.MapName+'"}');
+						players = API::PostAsync(playersURL, '{"apiKey":"'+apiKey+'","personalBest":'+personalBest+',"authorTime":'+map.TMObjective_AuthorTime+',"tag":"'+player.User.ClubTag+'","login":"'+player.User.Login+'","player":"'+player.User.Name+'","flag":"'+player.User.ZonePath+'","map":"'+GetApp().RootMap.MapName+'"}');
 						sleep(refreshRate);
 					} else {
 						sleep(500);
