@@ -78,7 +78,11 @@ void FetchData() {
 								// ScopeType can be: "Season", "PersonalBest"
 								// GameMode can be: "TimeAttack", "Follow", "ClashTime"
 						auto personalBest = scoreMgr.Map_GetRecord_v2(userId, map.MapInfo.MapUid, "PersonalBest", "", "TimeAttack", "");
-						players = API::PostAsync(playersURL, '{"apiKey":"'+apiKey+'","personalBest":'+personalBest+',"authorTime":'+map.TMObjective_AuthorTime+',"tag":"'+player.User.ClubTag+'","login":"'+player.User.Login+'","player":"'+player.User.Name+'","flag":"'+player.User.ZonePath+'","map":"'+GetApp().RootMap.MapName+'"}');
+						string clubTag = "";
+						if(player.User.ClubTag !is null) {
+							clubTag = player.User.ClubTag;
+						}
+						players = API::PostAsync(playersURL, '{"apiKey":"'+apiKey+'","personalBest":'+personalBest+',"authorTime":'+map.TMObjective_AuthorTime+',"tag":"'+clubTag+'","login":"'+player.User.Login+'","player":"'+player.User.Name+'","flag":"'+player.User.ZonePath+'","map":"'+GetApp().RootMap.MapName+'"}');
 						sleep(refreshRate);
 					} else {
 						sleep(500);
