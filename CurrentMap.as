@@ -1,40 +1,8 @@
-[Setting name="Window visible" description="To adjust the position of the window, click and drag while the Openplanet overlay is visible."]
-bool windowVisible = true;
-
-[Setting name="Display AT Gap" description="To display the current gap to the author time"]
-bool displayATGap = true;
-
-[Setting name="Hide on hidden interface"]
-bool hideWithIFace = false;
-
-[Setting name="Window position"]
-vec2 anchor = vec2(0, 170);
-
-[Setting name="Lock window position" description="Prevents the window moving when click and drag or when the game window changes size."]
-bool lockPosition = false;
-
-[Setting name="Font face" description="To avoid a memory issue with loading a large number of fonts, you must reload the plugin for font changes to be applied."]
-string fontFace = "";
-
-[Setting name="API Key" description="An API Key (unique identifier) needs to be provided. Put whatever you want as long as it is alphanumerical. Players you want to show need to put the same API Key."]
-string apiKey = "";
-
-[Setting name="Font size" min=8 max=48 description="To avoid a memory issue with loading a large number of fonts, you must reload the plugin for font changes to be applied."]
-int fontSize = 16;
-
-[Setting name="Refresh rate (ms)" min=5000 max=60000 description="Duration in milliseconds between each refresh."]
-int refreshRate = 10000;
-
-[Setting name="API Endpoint" description="Endpoint called to submit and receive players information"]
-string playersURL = "https://racacax.gq/trackmania/currentmap/players.php";
-
 string PLUGIN_NAME = "CurrentMap";
 bool IS_DEV_MODE = true;
-Json::Value players = Json::Value();
-auto countries = Json::Value();
+Json::Value players = Json::Array();
 bool isRunning = false;
-
-
+bool inError = false;
 int timeWidth = 53;
 int deltaWidth = 60;
 UI::Font@ font = null;
@@ -56,49 +24,16 @@ void LoadFont() {
 /*
 	Main loop to submit and fetch data about players (name, club tag, current map, ...)
 */
-void FetchData() {
-	while(true) {
-		if(isRunning) {
-			try {
-					auto player = GetPlayer();
-					if(player !is null) {
-						
-						auto network = cast<CTrackManiaNetwork>(GetApp().Network);
-						auto userMgr = network.ClientManiaAppPlayground.UserMgr;
-						auto map = GetApp().RootMap;
-						MwId userId;
-						if (userMgr.Users.Length > 0) {
-								userId = userMgr.Users[0].Id;
-						} else {
-								userId.Value = uint(-1);
-						}
-								
-						auto scoreMgr = network.ClientManiaAppPlayground.ScoreMgr;
-								// from: OpenplanetNext\Extract\Titles\Trackmania\Scripts\Libs\Nadeo\TMNext\TrackMania\Menu\Constants.Script.txt
-								// ScopeType can be: "Season", "PersonalBest"
-								// GameMode can be: "TimeAttack", "Follow", "ClashTime"
-						auto personalBest = scoreMgr.Map_GetRecord_v2(userId, map.MapInfo.MapUid, "PersonalBest", "", "TimeAttack", "");
-						players = API::PostAsync(playersURL, '{"apiKey":"'+apiKey+'","personalBest":'+personalBest+',"authorTime":'+map.TMObjective_AuthorTime+',"tag":"'+player.User.ClubTag+'","login":"'+player.User.Login+'","player":"'+player.User.Name+'","flag":"'+player.User.ZonePath+'","map":"'+GetApp().RootMap.MapName+'"}');
-						sleep(refreshRate);
-					} else {
-						sleep(500);
-					}
-				
-			} catch {
-				Log::Warn("An error occurred while fetching data");
-				sleep(500);
-			}
-		} else {
-			sleep(500);
-		}
-	}
-}
-
 void Main()
 {
+	if(accessToken != "") {
+		events.InsertAt(0, "login");
+	}
 	Flags::Init();
 	LoadFont();
-	FetchData(); // Main function
+	while(true) {
+		HandleEvents();
+	}
 }
 
 void Render() {
@@ -161,29 +96,45 @@ void Render() {
 						setMinWidth(timeWidth);
 						UI::Text("Gap to AT");
 					}
-					if(apiKey == "") {
+					if(!APIClient::loggedIn) {
 							UI::TableNextRow();
 							UI::TableNextColumn();
 							UI::TableNextColumn();
-							UI::Text(ColoredString("$f00API Key missing"));
+							UI::TextWrapped(ColoredString("$f00You are not logged in. Please check your status in the settings."));
+					}
+					
+					if(inError) {
+						UI::TableNextRow();
+						UI::TableNextColumn();
+						UI::TableNextColumn();
+						UI::Text(ColoredString("$f00Error while fetching data"));
 					}
 					try {
 						for (uint i = 0; i < players.Length; i++)
 						{		
-							string playerName = players[i]["player"];
-							string mapName = players[i]["map"];
-							string clubTag = players[i]["tag"];
-							string atGap = players[i]["atGap"];
+							string playerName = players[i]["display_name"];
+							string mapName = players[i]["current_map"]["name"];
+							string atGap = "/";
+							if(int(players[i]["current_pb"]) > 0) {
+								int gap = int(players[i]["current_pb"]) - int(players[i]["current_map"]["author_time"]);
+								if(gap > 0) {
+									atGap = "$f00+"; 
+								} else {
+									atGap = "$0f0-";
+								}
+								atGap += Time::Format(Math::Abs(gap));
+							}
 
 							UI::TableNextRow();
 							UI::TableNextColumn();
 							setMinWidth(0);
-							UI::Image(Flags::GetFlagByTrackmaniaRegion(players[i]["flag"]), vec2(fontSize*4/3, fontSize));
-							UI::TableNextColumn();
-							if(clubTag.Length > 0) {
-								playerName = "["+ColoredString(clubTag+"$fff")+"] "+playerName;
+							string region = "";
+							if(Json::Write(players[i]["region"]) != "null") {
+								region = players[i]["region"];
 							}
-							UI::Text(playerName);
+							UI::Image(Flags::GetFlagByTrackmaniaRegion(region), vec2(fontSize*4/3, fontSize));
+							UI::TableNextColumn();
+							UI::Text(ColoredString(playerName));
 							
 							UI::TableNextColumn();
 							setMinWidth(timeWidth);
@@ -195,7 +146,10 @@ void Render() {
 							}
 						}
 					} catch {
-						//Log::Warn("Error displaying infos");
+						UI::TableNextRow();
+						UI::TableNextColumn();
+						UI::TableNextColumn();
+						UI::Text(ColoredString("$f00Error while rendering data"));
 					}
 
 
@@ -204,7 +158,6 @@ void Render() {
 			UI::EndGroup();
 			
 			UI::End();
-			
 			UI::PopFont();
 		} else {
 			isRunning = false;
@@ -212,12 +165,4 @@ void Render() {
 	} catch {
 		Log::Warn("An error occurred while rendering");
 	}
-}
-
-
-
-void setMinWidth(int width) {
-	UI::PushStyleVar(UI::StyleVar::ItemSpacing, vec2(0, 0));
-	UI::Dummy(vec2(width, 0));
-	UI::PopStyleVar();
 }
