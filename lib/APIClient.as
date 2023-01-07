@@ -1,7 +1,7 @@
 namespace APIClient {
 
     bool loggedIn = false;
-    string errorCode = "not_in_game";
+    string errorCode = "not_logged";
     /**
         Method to login to the API. Will automaticly register if player doesn't have a token.
         Return Cases :

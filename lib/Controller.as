@@ -6,7 +6,7 @@ void CheckPlayer() {
 	if(player !is null) {
 		APIClient::errorCode = "not_logged";
 	} else {
-		APIClient::errorCode = "not_in_game";
+		APIClient::errorCode = "player_null";
 	}
 }
 void Login() {
@@ -24,7 +24,7 @@ void Login() {
 			AccessSettings::accountsInfo = result["accounts"];
 		}
 	} else {
-		APIClient::errorCode = "not_in_game";
+		APIClient::errorCode = "player_null";
 		if(accessToken != "") {
 			events.InsertAt(0, "login");
 		}

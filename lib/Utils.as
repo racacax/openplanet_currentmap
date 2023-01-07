@@ -4,29 +4,19 @@
 Json::Value@ GetPlayer() {
 	Json::Value@ playerData = Json::Object();
 	playerData["login"] = GetLocalLogin();
+	auto app = cast<CTrackMania>(GetApp());
 #if TMNEXT
 	try {
-		string login = GetLocalLogin();
-
-		auto pg = GetApp().CurrentPlayground;
-
-		for (uint i = 0; i < pg.Players.Length; i++) {
-			auto player = cast<CGamePlayer>(pg.Players[i]);
-				
-			if (player.User.Login == login) {
-				playerData["club_tag"] = string(player.User.ClubTag);
-        		playerData["name"] = string(player.User.Name);
-        		playerData["region"] = string(player.User.ZonePath);
-				return playerData;
-			}
-		}
-		return null;
+		auto playerInfo = app.LoadedCore.ManiaPlanet.LocalPlayerInfo;
+		playerData["club_tag"] = string(playerInfo.ClubTag);
+        playerData["name"] = string(playerInfo.Name);
+        playerData["region"] = string(playerInfo.ZonePath);
+		return playerData;
 	} catch {
 		return null;
 	}
 #elif MP4
 	try {
-		auto app = cast<CTrackMania>(GetApp());
 		playerData["login"] = string(app.CurrentProfile.AccountSettings.OnlineLogin);
 		playerData["name"] = string(app.CurrentProfile.AccountSettings.OnlineLogin);
 		playerData["nickname"] = string(app.CurrentProfile.AccountSettings.NickName);

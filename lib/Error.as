@@ -6,7 +6,6 @@ dictionary errors = {
     {"not_logged", "You currently don't have an account. Please press Login to automatically register."
     " If you already have an account for the plugin on another Trackmania game, you can copy/paste your "
     "Access Token from the other game plugin below."},
-    {"not_in_game", "You need to be on a map to be able to register/login."},
     {"invite_exists", "You already sent an invite to this player."}
 };
 

@@ -20,18 +20,16 @@ namespace AccessSettings {
     if(!APIClient::loggedIn) {
       UI::Text("");
       UI::TextWrapped(getError(APIClient::errorCode));
-      if(APIClient::errorCode != "not_in_game") {
-        UI::BeginTable("updatetoken", 3, UI::TableFlags::SizingFixedFit);
-        UI::TableNextRow();
-        UI::TableNextColumn();
-        updatedAccessToken = UI::InputText("Access Token", updatedAccessToken);
-        UI::TableNextColumn();
-        if(UI::Button(" Login")) {
-          accessToken = updatedAccessToken;
-          events.InsertAt(0, "login");
-        }
-        UI::EndTable();
+      UI::BeginTable("updatetoken", 3, UI::TableFlags::SizingFixedFit);
+      UI::TableNextRow();
+      UI::TableNextColumn();
+      updatedAccessToken = UI::InputText("Access Token", updatedAccessToken);
+      UI::TableNextColumn();
+      if(UI::Button(" Login")) {
+        accessToken = updatedAccessToken;
+        events.InsertAt(0, "login");
       }
+      UI::EndTable();
     } else {
       UI::Text("You are logged in.");
       UI::Text("Linked accounts :");
