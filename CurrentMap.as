@@ -100,7 +100,7 @@ void Render() {
 							UI::TableNextRow();
 							UI::TableNextColumn();
 							UI::TableNextColumn();
-							UI::TextWrapped(ColoredString("$f00You are not logged in. Please check your status in the settings."));
+							UI::Text(ColoredString("$f00You are not logged in. Please check your status in the settings."));
 					}
 					
 					if(inError) {
