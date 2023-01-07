@@ -125,7 +125,6 @@ void FetchData() {
 				if(player !is null) {
 					Json::Value mapInfo = getMapData();
 					players = APIClient::SubmitInfoAndRetrieveGroupData(mapInfo, favoriteGroupId);
-					Log::Trace(Json::Write(players));
 				} else {
 					lastChecked = 0;
 				}
