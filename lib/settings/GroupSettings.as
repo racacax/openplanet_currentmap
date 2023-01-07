@@ -148,10 +148,10 @@ void RenderFavoriteGroup() {
     Json::Value groups = Json::Array();
     auto joinedGroups = Json::Write(JoinedGroupSettings::joinedGroups);
     auto ownedGroups = Json::Write(GroupSettings::ownedGroups);
-    if(joinedGroups.Length == 0) {
-        groups = ownedGroups;
-    } else if(ownedGroups.Length == 0) {
-        groups = joinedGroups;
+    if(JoinedGroupSettings::joinedGroups.Length == 0) {
+        groups = GroupSettings::ownedGroups;
+    } else if(GroupSettings::ownedGroups.Length == 0) {
+        groups = JoinedGroupSettings::joinedGroups;
     } else {
         groups = Json::Parse(ownedGroups.SubStr(0, ownedGroups.Length -1) + "," + joinedGroups.SubStr(1));
     }
