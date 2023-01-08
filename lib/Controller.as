@@ -3,9 +3,7 @@ int64 lastChecked = 0;
 
 void CheckPlayer() {
 	auto player = GetPlayer();
-	if(player !is null) {
-		APIClient::errorCode = "not_logged";
-	} else {
+	if(player is null) {
 		APIClient::errorCode = "player_null";
 	}
 }

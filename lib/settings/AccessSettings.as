@@ -20,6 +20,11 @@ namespace AccessSettings {
     if(!APIClient::loggedIn) {
       UI::Text("");
       UI::TextWrapped(getError(APIClient::errorCode));
+      if(APIClient::errorCode == "account_exists" || APIClient::errorCode == "wrong_token_or_account") {
+        if(UI::Button(" Reset token")) {
+          OpenBrowserURL(baseURL.Replace("/api/", "/link/reset/"));
+        }
+      }
       UI::BeginTable("updatetoken", 3, UI::TableFlags::SizingFixedFit);
       UI::TableNextRow();
       UI::TableNextColumn();
