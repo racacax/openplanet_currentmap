@@ -31,14 +31,14 @@ namespace InvitesSettings {
                 UI::Text(ColoredString(receivedInvites[i]["from_player"]["display_name"]));
                 UI::TableNextColumn();
                 UI::PushStyleColor(UI::Col::Button, vec4(0,1,0,1));
-                if(UI::Button(" Accept")){
+                if(UI::Button(" Accept##"+tostring(i))){
                     selectedInvite = receivedInvites[i]["id"];
                     events.InsertAt(0, "acceptInvite");
                 }
                 UI::PopStyleColor(1);
                 UI::TableNextColumn();
                 UI::PushStyleColor(UI::Col::Button, vec4(1,0,0,1));
-                if(UI::Button(" Decline")){
+                if(UI::Button(" Decline##"+tostring(i))){
                     selectedInvite = receivedInvites[i]["id"];
                     events.InsertAt(0, "declineInvite");
                 }
