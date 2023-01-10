@@ -9,7 +9,16 @@ namespace GroupSettings {
     string playerName = "";
     int playerInvitedId = 0;
     void RenderOwnedGroups() {
+        UI::Text("List of the groups you created.");
         UI::BeginTable("myGroups", 2, UI::TableFlags::SizingFixedFit);
+        UI::TableNextRow();
+        UI::TableNextColumn();
+        setMinWidth(140);
+        groupName = UI::InputText("Group name", groupName);
+        UI::TableNextColumn();
+        if(UI::Button(" Create") && groupName.Length > 0){
+            AddEvent("createGroup");
+        }
         UI::TableNextRow();
 		UI::TableNextColumn();
         setMinWidth(400);
@@ -30,13 +39,13 @@ namespace GroupSettings {
 		UI::TableNextColumn();
         if(UI::Button(" Refresh")){
             Log::Warn("Refreshing...");
-            events.InsertAt(0, "fetchGroupsOwned");
+            AddEvent("fetchGroupsOwned");
         }
         UI::EndTable();
         if(selectedGroup["id"] != 0) {
             UI::PushStyleColor(UI::Col::Button, vec4(1,0,0,1));
             if(UI::Button(" Delete group")){
-                events.InsertAt(0, "deleteGroup");
+                AddEvent("deleteGroup");
             }
             UI::PopStyleColor(1);
             UI::BeginTable("groupMembers", 2, UI::TableFlags::SizingFixedFit);
@@ -55,7 +64,7 @@ namespace GroupSettings {
                 UI::TableNextColumn();
                 UI::PushStyleColor(UI::Col::Button, vec4(1,0,0,1));
                 if(UI::Button(" Kick")){
-                    events.InsertAt(0, "kickPlayer");
+                    AddEvent("kickPlayer");
                 }
                 UI::PopStyleColor(1);
             }
@@ -66,10 +75,13 @@ namespace GroupSettings {
             UI::TableNextRow();
             UI::TableNextColumn();
             setMinWidth(140);
+            UI::Text("You can invite players to your group by searching below.");
+            UI::TableNextRow();
+            UI::TableNextColumn();
             playerName = UI::InputText("Search player", playerName);
             UI::TableNextColumn();
             if(UI::Button(" Search") && playerName.Length > 0){
-                events.InsertAt(0, "searchPlayer");
+                AddEvent("searchPlayer");
             }
             UI::TableNextRow();
             UI::TableNextColumn();
@@ -89,23 +101,14 @@ namespace GroupSettings {
                     UI::TableNextColumn();
                     if(UI::Button(" Invite##"+tostring(i))){
                         playerInvitedId = playersFound[i]["id"];
-                        events.InsertAt(0, "invitePlayer");
+                        AddEvent("invitePlayer");
                         playersFound.Remove(i);
                     }
                 }
             }
             UI::EndTable();
         }
-        UI::TableNextRow();
-        UI::TableNextColumn();
-        setMinWidth(140);
-        groupName = UI::InputText("Group name", groupName);
-        UI::TableNextColumn();
-        if(UI::Button(" Create") && groupName.Length > 0){
-            events.InsertAt(0, "createGroup");
-        }
         UI::EndTable();
-        UI::Text("--------------------------");
     }
 
 }
@@ -130,13 +133,13 @@ namespace JoinedGroupSettings {
 		UI::TableNextColumn();
         if(UI::Button(" Refresh")){
             Log::Warn("Refreshing...");
-            events.InsertAt(0, "fetchGroupsJoined");
+            AddEvent("fetchGroupsJoined");
         }
         UI::EndTable();
         if(selectedGroup["id"] != 0) {
             UI::PushStyleColor(UI::Col::Button, vec4(1,0,0,1));
             if(UI::Button(" Leave group")){
-                events.InsertAt(0, "leaveGroup");
+                AddEvent("leaveGroup");
             }
             UI::PopStyleColor(1);
             UI::Text(ColoredString("Owner : " + string(selectedGroup["owner"]["display_name"])));
@@ -145,6 +148,7 @@ namespace JoinedGroupSettings {
 }
 
 void RenderFavoriteGroup() {
+    LoadGroups();
     Json::Value groups = Json::Array();
     auto joinedGroups = Json::Write(JoinedGroupSettings::joinedGroups);
     auto ownedGroups = Json::Write(GroupSettings::ownedGroups);
@@ -161,6 +165,7 @@ void RenderFavoriteGroup() {
                 if (UI::Selectable(ColoredString(groups[i]["name"]), int(groups[i]["id"]) == favoriteGroupId)) {
                     favoriteGroupId = groups[i]["id"];
                     favoriteGroupName = groups[i]["name"];
+                    RefreshDataIfInGame();
                 }
                 favoriteFound = favoriteFound || int(groups[i]["id"]) == favoriteGroupId;
             }
@@ -169,8 +174,23 @@ void RenderFavoriteGroup() {
             }
             UI::EndCombo();
     }
+    
+    if(UI::Button(" Refresh")){
+        Log::Warn("Refreshing...");
+        AddEvent("fetchGroupsOwned");
+        AddEvent("fetchGroupsJoined");
+    }
 }
-
+void LoadGroups() {
+    if(!GroupSettings::groupsLoaded) {
+        GroupSettings::groupsLoaded = true;
+        AddEvent("fetchGroupsOwned");
+    }
+    if(!JoinedGroupSettings::groupsLoaded) {
+        JoinedGroupSettings::groupsLoaded = true;
+        AddEvent("fetchGroupsJoined");
+    }
+}
 [SettingsTab name="Groups" icon="Users"]
 void RenderGroupSettings()
 {
@@ -183,17 +203,15 @@ void RenderGroupSettings()
             JoinedGroupSettings::selectedGroup["id"] = 0;
             JoinedGroupSettings::selectedGroup["name"] = "---------";
         }
-        if(!GroupSettings::groupsLoaded) {
-            GroupSettings::groupsLoaded = true;
-            events.InsertAt(0, "fetchGroupsOwned");
-        }
-        if(!JoinedGroupSettings::groupsLoaded) {
-            JoinedGroupSettings::groupsLoaded = true;
-            events.InsertAt(0, "fetchGroupsJoined");
-        }
-        GroupSettings::RenderOwnedGroups();
-        JoinedGroupSettings::RenderJoinedGroups();
+        LoadGroups();
         RenderFavoriteGroup();
+        if(UI::CollapsingHeader("Owned groups")) {
+
+            GroupSettings::RenderOwnedGroups();
+        }
+        if(UI::CollapsingHeader("Joined groups")) {
+            JoinedGroupSettings::RenderJoinedGroups();
+        }
     } else {
         UI::Text(getError(APIClient::errorCode));
     }

@@ -11,7 +11,7 @@ namespace InvitesSettings {
 		UI::TableNextColumn();
         if(UI::Button(" Refresh")){
             Log::Warn("Refreshing...");
-            events.InsertAt(0, "fetchReceivedInvites");
+            AddEvent("fetchReceivedInvites");
         }
         if(receivedInvites.Length == 0) {
             UI::TableNextRow();
@@ -33,14 +33,18 @@ namespace InvitesSettings {
                 UI::PushStyleColor(UI::Col::Button, vec4(0,1,0,1));
                 if(UI::Button(" Accept##"+tostring(i))){
                     selectedInvite = receivedInvites[i]["id"];
-                    events.InsertAt(0, "acceptInvite");
+                    AddEvent("acceptInvite");
+                    if(!JoinedGroupSettings::groupsLoaded) { // it means GroupSettings has been loaded
+                        JoinedGroupSettings::groupsLoaded = true;
+                        AddEvent("fetchGroupsJoined");
+                    }
                 }
                 UI::PopStyleColor(1);
                 UI::TableNextColumn();
                 UI::PushStyleColor(UI::Col::Button, vec4(1,0,0,1));
                 if(UI::Button(" Decline##"+tostring(i))){
                     selectedInvite = receivedInvites[i]["id"];
-                    events.InsertAt(0, "declineInvite");
+                    AddEvent("declineInvite");
                 }
                 UI::PopStyleColor(1);
             }
@@ -61,7 +65,7 @@ namespace InvitesSettings {
 		UI::TableNextColumn();
         if(UI::Button(" Refresh")){
             Log::Warn("Refreshing...");
-            events.InsertAt(0, "fetchSentInvites");
+            AddEvent("fetchSentInvites");
         }
         if(sentInvites.Length == 0) {
             UI::TableNextRow();
@@ -83,7 +87,7 @@ namespace InvitesSettings {
                 UI::PushStyleColor(UI::Col::Button, vec4(1,0,0,1));
                 if(UI::Button(" Delete")){
                     selectedInvite = sentInvites[i]["id"];
-                    events.InsertAt(0, "deleteInvite");
+                    AddEvent("deleteInvite");
                 }
                 UI::PopStyleColor(1);
             }
@@ -99,8 +103,8 @@ void RenderInviteSettings()
     if(APIClient::loggedIn) {
         if(!InvitesSettings::invitesLoaded) {
             InvitesSettings::invitesLoaded = true;
-            events.InsertAt(0, "fetchReceivedInvites");
-            events.InsertAt(0, "fetchSentInvites");
+            AddEvent("fetchReceivedInvites");
+            AddEvent("fetchSentInvites");
         }
         InvitesSettings::RenderReceivedInvites();
         InvitesSettings::RenderSentInvites();
