@@ -16,8 +16,8 @@ namespace AccessSettings {
     }
     UI::EndTable();
   }
-  void RenderUpdateAccessToken() {
-    if(!APIClient::loggedIn) {
+
+  void RenderLoginScreen() {
       UI::Text("");
       UI::TextWrapped(getError(APIClient::errorCode));
       if(APIClient::errorCode == "account_exists" || APIClient::errorCode == "wrong_token_or_account") {
@@ -32,9 +32,13 @@ namespace AccessSettings {
       UI::TableNextColumn();
       if(UI::Button(" Login")) {
         accessToken = updatedAccessToken;
-        events.InsertAt(0, "login");
+        AddEvent("login");
       }
       UI::EndTable();
+  }
+  void RenderUpdateAccessToken() {
+    if(!APIClient::loggedIn) {
+      RenderLoginScreen();
     } else {
       UI::Text("You are logged in.");
       UI::Text("Linked accounts :");

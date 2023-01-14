@@ -1,26 +1,32 @@
 // Source : https://github.com/GreepTheSheep/openplanet-maniaexchange-menu/blob/main/src/Utils/API.as
 namespace API
 {
-    Net::HttpRequest@ Get(const string &in url)
+    Net::HttpRequest@ DeclareHttpRequest(const string &in url, Net::HttpMethod method, const bool isApi, const string &in body = "")
     {
         auto ret = Net::HttpRequest();
-        ret.Method = Net::HttpMethod::Get;
+        ret.Method = method;
         ret.Url = url;
-        Log::Trace("Get: " + url);
+        ret.Headers.Set("Content-Type", "application/json");
+        Log::Trace(tostring(method) + ": " + url);
+        if(body != "") {
+            ret.Body = body;
+            Log::Trace("Body: " + body);
+        }
+        if(isApi) {
+            ret.Headers.Set("X-AuthKey", accessToken);
+            ret.Headers.Set("X-GameId", tostring(GAME_ID));
+        }
         ret.Start();
         return ret;
+    }
+    Net::HttpRequest@ Get(const string &in url)
+    {
+        return DeclareHttpRequest(url, Net::HttpMethod::Get, false);
     }
 
     Net::HttpRequest@ GetFromApi(const string &in url)
     {
-        auto ret = Net::HttpRequest();
-        ret.Method = Net::HttpMethod::Get;
-        ret.Url = url;
-        Log::Trace("Get: " + url);
-        ret.Headers.Set("X-AuthKey", accessToken);
-        ret.Headers.Set("X-GameId", tostring(GAME_ID));
-        ret.Start();
-        return ret;
+        return DeclareHttpRequest(url, Net::HttpMethod::Get, true);
     }
 
     Json::Value GetAsync(const string &in url)
@@ -46,30 +52,12 @@ namespace API
 
     Net::HttpRequest@ Post(const string &in url, const string &in body)
     {
-        auto ret = Net::HttpRequest();
-        ret.Method = Net::HttpMethod::Post;
-        ret.Url = url;
-        ret.Body = body;
-        ret.Headers.Set("Content-Type", "application/json");
-        Log::Trace("Post: " + url);
-        Log::Trace("Body: " + body);
-        ret.Start();
-        return ret;
+        return DeclareHttpRequest(url, Net::HttpMethod::Post, false, body);
     }
 
     Net::HttpRequest@ PostFromApi(const string &in url, const string &in body)
     {
-        auto ret = Net::HttpRequest();
-        ret.Method = Net::HttpMethod::Post;
-        ret.Url = url;
-        ret.Body = body;
-        ret.Headers.Set("Content-Type", "application/json");
-        Log::Trace("Post: " + url);
-        Log::Trace("Body: " + body);
-        ret.Headers.Set("X-AuthKey", accessToken);
-        ret.Headers.Set("X-GameId", tostring(GAME_ID));
-        ret.Start();
-        return ret;
+        return DeclareHttpRequest(url, Net::HttpMethod::Post, true, body);
     }
 
     Json::Value PostFromApiAsync(const string &in url, const string &in body)
@@ -96,17 +84,7 @@ namespace API
     
     Net::HttpRequest@ DeleteFromApi(const string &in url, const string &in body)
     {
-        auto ret = Net::HttpRequest();
-        ret.Method = Net::HttpMethod::Delete;
-        ret.Url = url;
-        ret.Body = body;
-        ret.Headers.Set("Content-Type", "application/json");
-        Log::Trace("Post: " + url);
-        Log::Trace("Body: " + body);
-        ret.Headers.Set("X-AuthKey", accessToken);
-        ret.Headers.Set("X-GameId", tostring(GAME_ID));
-        ret.Start();
-        return ret;
+        return DeclareHttpRequest(url, Net::HttpMethod::Delete, true, body);
     }
 
     Json::Value DeleteFromApiAsync(const string &in url, const string &in body)

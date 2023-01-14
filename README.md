@@ -10,7 +10,7 @@ Every player present in the selected group (Displayed group in the settings) wil
 ![Settings screenshot](https://i.imgur.com/V461bMG.png)
 ![Settings screenshot](https://i.imgur.com/N2g5us8.png)
 ![Settings screenshot](https://i.imgur.com/D2F1EQK.png)
-![Settings screenshot](https://i.imgur.com/B62ntwa.png)
+![Settings screenshot](https://i.imgur.com/GzlAeU3.png)
 
 All information are sent and stored temporarly to a server in order to share them with every player in your group. Here is the list of what is shared and stored :
 

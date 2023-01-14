@@ -28,14 +28,14 @@ int refreshRate = 10000;
 [Setting category="Main" name="API Endpoint" description="Endpoint called to submit and receive players information"]
 string baseURL = "https://currentmap.racacax.gq/api/";
 
-[Setting category="Main" name="Access Token" hidden=True description="Access Token to the API."]
+[Setting category="Main" name="Access Token" hidden description="Access Token to the API."]
 string accessToken = "";
 
-[Setting category="Main" name="Gap To" hidden=True description="To what time do we display the gap"]
+[Setting category="Main" name="Gap To" hidden description="To what time do we display the gap"]
 string gapTo = "AT";
 
-[Setting category="Main" name="Favorite Group Id" hidden=True description="What group is displayed on screen"]
+[Setting category="Main" name="Favorite Group Id" hidden description="What group is displayed on screen"]
 int favoriteGroupId = -1;
 
-[Setting category="Main" name="Favorite Group Name" hidden=True description="What group is displayed on screen"]
+[Setting category="Main" name="Favorite Group Name" hidden description="What group is displayed on screen"]
 string favoriteGroupName = "-------";

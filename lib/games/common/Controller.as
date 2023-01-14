@@ -1,5 +1,12 @@
 array<string> events = {};
+
+void AddEvent(const string &in a) {
+	events.InsertAt(0, a);
+}
 int64 lastChecked = 0;
+void RefreshDataIfInGame() {
+	lastChecked = 0;
+}
 
 void CheckPlayer() {
 	auto player = GetPlayer();
@@ -24,7 +31,7 @@ void Login() {
 	} else {
 		APIClient::errorCode = "player_null";
 		if(accessToken != "") {
-			events.InsertAt(0, "login");
+			AddEvent("login");
 		}
 	}
 }
@@ -34,7 +41,7 @@ void FetchGroupsOwned() {
 	GroupSettings::ownedGroups = APIClient::GetGroupsOwned();
 	GroupSettings::playersFound = Json::Array();
 	if(GroupSettings::ownedGroups.Length > 0) {
-		GroupSettings::selectedGroup = GroupSettings::ownedGroups[0];
+		GroupSettings::selectedGroup = GroupSettings::ownedGroups[GroupSettings::ownedGroups.Length - 1];
 		if(GroupSettings::selectedGroup["members"].Length > 0) {
 			GroupSettings::selectedMember = GroupSettings::selectedGroup["members"][0];
 		}
@@ -60,17 +67,17 @@ void FetchReceivedInvites() {
 void AcceptInvite() {
 	APIClient::AnswerInvites(true, InvitesSettings::selectedInvite);
 	Log::Succeed("Invite accepted.");
-	events.InsertAt(0, "fetchReceivedInvites");
+	AddEvent("fetchReceivedInvites");
 }
 void DeclineInvite() {
 	APIClient::AnswerInvites(false, InvitesSettings::selectedInvite);
 	Log::Succeed("Invite declined.");
-	events.InsertAt(0, "fetchReceivedInvites");
+	AddEvent("fetchReceivedInvites");
 }
 void DeleteInvite() {
 	APIClient::DeleteInvite(InvitesSettings::selectedInvite);
 	Log::Succeed("Invite deleted.");
-	events.InsertAt(0, "fetchSentInvites");
+	AddEvent("fetchSentInvites");
 }
 
 void FetchSentInvites() {
@@ -80,14 +87,14 @@ void FetchSentInvites() {
 
 void LeaveGroup() {
 	APIClient::QuitGroup(JoinedGroupSettings::selectedGroup["id"]);
-	events.InsertAt(0, "fetchGroupsJoined");
+	AddEvent("fetchGroupsJoined");
 	Log::Succeed("Group left.");
 }
 
 void CreateGroup() {
 	APIClient::CreateGroup(GroupSettings::groupName);
 	GroupSettings::groupName = "";
-	events.InsertAt(0, "fetchGroupsOwned");
+	AddEvent("fetchGroupsOwned");
 	Log::Succeed("Group created.");
 }
 
@@ -100,13 +107,13 @@ void SearchPlayer() {
 
 void DeleteGroup() {
 	APIClient::DeleteGroup(GroupSettings::selectedGroup["id"]);
-	events.InsertAt(0, "fetchGroupsOwned");
+	AddEvent("fetchGroupsOwned");
 	Log::Succeed("Group deleted.");
 }
 
 void KickPlayer() {
 	APIClient::RemovePlayerFromGroup(GroupSettings::selectedMember["id"], GroupSettings::selectedGroup["id"]);
-	events.InsertAt(0, "fetchGroupsOwned");
+	AddEvent("fetchGroupsOwned");
 	Log::Succeed("Player kicked.");
 }
 
@@ -116,18 +123,17 @@ void InvitePlayer() {
 }
 
 void FetchData() {
-	if(isRunning) {
+	if(IsActive()) {
 		lastChecked = Time::get_Now();
 		try {
-				auto player = GetPlayer();
-				if(player !is null) {
-					Json::Value mapInfo = getMapData();
-					players = APIClient::SubmitInfoAndRetrieveGroupData(mapInfo, favoriteGroupId);
-				} else {
-					lastChecked = 0;
-				}
-				inError = false;
-				
+			auto player = GetPlayer();
+			if(player !is null) {
+				Json::Value mapInfo = GetMapData();
+				players = APIClient::SubmitInfoAndRetrieveGroupData(mapInfo, favoriteGroupId);
+			} else {
+				lastChecked = 0;
+			}
+			inError = false;		
 		} catch {
 			inError = true;
 		}
@@ -136,7 +142,7 @@ void FetchData() {
 
 
 void HandleEvents() {
-    for( int n = events.Length -1; n >= 0; n-- ) {
+    for(int n = events.Length -1; n >= 0; n-- ) {
         auto event = events[n];
         events.RemoveAt(n);
 		if(event == "login") {
