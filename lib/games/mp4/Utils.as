@@ -10,7 +10,11 @@ Json::Value@ GetPlayerFromGame() {
 		playerData["name"] = GetLocalLogin();
 		playerData["nickname"] = string(app.CurrentProfile.AccountSettings.NickName);
 		auto network = cast<CTrackManiaNetwork>(app.Network);
-		playerData["region"] = string(network.PlayerInfo.ZonePath);
+		string region = string(network.PlayerInfo.ZonePath);
+		playerData["region"] = region;
+		if(region == "") {
+			return null;
+		}
 		return playerData;
 	} catch {
 		return null;
