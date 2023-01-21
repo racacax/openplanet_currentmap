@@ -12,7 +12,7 @@ Json::Value@ GetPlayerFromGame() {
       return null;
     }
     playerData["club_tag"] = string(playerInfo.ClubTag);
-    if(string(playerInfo.ClubTag) != currentPlayerClubTag && APIClient::loggedIn) { // Login if player changed ClubTag
+    if(string(playerInfo.ClubTag) != currentPlayerClubTag && APIClient::loggedIn) { // Re-Login if player changed ClubTag
       AddEvent("login");
     }
     currentPlayerClubTag = string(playerInfo.ClubTag);
