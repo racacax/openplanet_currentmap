@@ -2,6 +2,7 @@
 /**
 	Method to get the current player profile data from TM2020. Can be null if not connected.
 */
+string currentPlayerClubTag = "";
 Json::Value@ GetPlayerFromGame() {
   Json::Value@ playerData = Json::Object();
   auto app = cast<CTrackMania>(GetApp());
@@ -11,6 +12,10 @@ Json::Value@ GetPlayerFromGame() {
       return null;
     }
     playerData["club_tag"] = string(playerInfo.ClubTag);
+    if(string(playerInfo.ClubTag) != currentPlayerClubTag && APIClient::loggedIn) { // Re-Login if player changed ClubTag
+      AddEvent("login");
+    }
+    currentPlayerClubTag = string(playerInfo.ClubTag);
     playerData["name"] = string(playerInfo.Name);
     playerData["region"] = string(playerInfo.ZonePath);
     return playerData;
