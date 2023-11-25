@@ -26,7 +26,7 @@ int fontSize = 16;
 int refreshRate = 10000;
 
 [Setting category="Main" name="API Endpoint" description="Endpoint called to submit and receive players information"]
-string baseURL = "https://currentmap.racacax.gq/api/";
+string baseURL = "https://currentmap.racacax.fr/api/";
 
 [Setting category="Main" name="Access Token" hidden description="Access Token to the API."]
 string accessToken = "";
